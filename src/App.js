@@ -1,26 +1,51 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {BrowserRouter, Switch, Route} from 'react-router-dom' //You can install this complement using: npm i react-router-dom
 
-function App() {
+//Login component
+import Login from './components/login/Login'
+
+//Fixed components
+import Header from './components/header/Header';
+import Sidebar from './components/sidebar/Sidebar';
+import Footer from './components/footer/Footer'
+
+//Dynamic components
+import Administrators from './components/contents/administrators/Administrators'
+import Slide from './components/contents/slide/Slide'
+import Galery from './components/contents/galery/Galery'
+import Users from './components/contents/users/Users'
+import Articles from './components/contents/articles/Articles'
+import Error404 from './components/contents/error404/Error404'
+
+export default function App() {
+  const auth = false;
+  if(!auth){
+    return(
+      <Login/>
+    )
+  }
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="sidebar-mini">
+      <div className="wrapper">
+        <Header/>
+        <Sidebar/>
+
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/" component={Administrators}/>
+            <Route exact path="/users" component={Users}/>
+            <Route exact path="/slide" component={Slide}/>
+            <Route exact path="/galery" component={Galery}/>
+            <Route exact path="/articles" component={Articles}/>
+            <Route component={Error404}/>
+          </Switch>
+        </BrowserRouter>
+
+        {/* <Administrators/> */}
+        <Footer/>
+      </div>
     </div>
   );
 }
-
-export default App;
