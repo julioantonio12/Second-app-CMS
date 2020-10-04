@@ -1,6 +1,15 @@
 import React from 'react';
 
-export default function Header(){        
+export default function Header(){     
+    /*----------------------------
+    Sign out function
+    -----------------------------*/
+    const signOut = ()=>{
+        localStorage.removeItem("ACCESS_TOKEN");
+        localStorage.removeItem("ID");
+        localStorage.removeItem("USER");
+    }
+    
     return(
         <nav className="main-header navbar navbar-expand navbar-white navbar-light">
             <ul className="navbar-nav">
@@ -13,7 +22,9 @@ export default function Header(){
 
             <ul className="navbar-nav ml-auto">
                 <li className="nav-item">
-                    <a href="#/" className="nav-link">
+                    <a href="/" 
+                        className="nav-link"
+                        onClick = {()=>{signOut()}}>
                         <i className="fas fa-sign-out-alt"></i>
                     </a> 
                 </li>

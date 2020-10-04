@@ -1,5 +1,7 @@
 import React from 'react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom' //You can install this complement using: npm i react-router-dom
+import jwtDecode from 'jwt-decode';
+import './App.css';
 
 //Login component
 import Login from './components/login/Login'
@@ -18,15 +20,15 @@ import Articles from './components/contents/articles/Articles'
 import Error404 from './components/contents/error404/Error404'
 
 export default function App() {
-  const auth = false;
-  if(!auth){
+  const auth = getAccessToken();
+
+  if(!auth){ //If not authenticated
     return(
       <Login/>
     )
   }
 
-
-  return (
+  return ( //If authenticated
     <div className="sidebar-mini">
       <div className="wrapper">
         <Header/>
@@ -48,4 +50,39 @@ export default function App() {
       </div>
     </div>
   );
+}
+
+//Function to have access to the token
+const getAccessToken = ()=>{
+  const accessToken = localStorage.getItem("ACCESS_TOKEN");
+  const idUser = localStorage.getItem("ID");
+  const user = localStorage.getItem("USER");
+
+  if(!accessToken || accessToken === null ||
+     !idUser || idUser === null ||
+     !user || user === null)
+  {
+    return false;
+  }
+    
+  const metaToken = jwtDecode(accessToken);
+
+  if(!metaToken.data)
+    return false;
+  
+
+  if(isTokenExpired(accessToken, metaToken) || metaToken.data._id !== idUser || metaToken.data.user !== user)
+    return false;
+  
+  else
+    return true;
+}
+
+//Function to verify token expiration date
+const isTokenExpired = (accessToken, metaToken)=>{
+  const seconds = 60;
+  const {exp} = metaToken;
+  const now = (Date.now()+seconds)/1000;
+
+  return exp < now;
 }

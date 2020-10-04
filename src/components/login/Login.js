@@ -1,19 +1,42 @@
 import React, {useState} from 'react'
+//Api route. When you upload the site, you just have to go to this route and change the config
+import {routeAPI} from '../../config/Config' 
+import $ from "jquery" //Import jquery in a private way
 
 export default function Login(){
 	//Hook to login
-	const [administrators, logIn] = useState({
+	const [administrators, logInChanges] = useState({
 		user: "",
 		password: ""
 	});
 
 	//Capturing changes from the form to execute the hook's function
 	const changeForm = e =>{ //'e' can be withouth parenthesis because it is just 1 attribute
-		console.log(e.target.value)
-		logIn({
-			user: e.target.value,
-			password: e.target.value
+		logInChanges({
+			...administrators,
+			[e.target.name]: e.target.value, //the "name" value is the name of the input
 		})
+	}
+
+	const logIn = async e =>{
+		$(".alert").remove();
+		e.preventDefault(); //Allows you to prevent any default function using submit from your browser
+		const result = await loginAPI(administrators);
+		// console.log("Result", result);
+		if(result.status !== 200){
+			$("button[type='submit']").before(`<div class="alert alert-danger">${result.mensaje}
+				</div>`)
+		}
+		else{
+			// $("button[type='submit']").before(`<div class="alert alert-success">${result.token}
+			// 	</div>`)	
+			localStorage.setItem("ACCESS_TOKEN", result.token)
+			localStorage.setItem("ID", result.data._id);
+			localStorage.setItem("USER", result.data.user)
+
+			//this reloads the login page to execute the getAccessToken() function that is inside App.js
+			window.location.href = "/"; 
+		}
 	}
 
 	// Return the view to login
@@ -28,7 +51,7 @@ export default function Login(){
 						<p className="login-box-msg">
 							Ingresa los campos para iniciar sesión
 						</p>
-						<form onChange={changeForm}>
+						<form onChange={changeForm} onSubmit={logIn}>
 							<div className="input-group mb-3">
 								<input
 									type="text"
@@ -68,4 +91,24 @@ export default function Login(){
 			</div>
 		</div>
     )
+}
+
+//Petition POST for Login
+const loginAPI = data =>{ //data is the variable sent: "administrators"
+	const url = `${routeAPI}/login`
+	const params = {
+		method: 'POST',
+		body: JSON.stringify(data),
+		headers: {
+			"Content-Type": "application/json"
+		}
+	}
+	return fetch(url, params).then(response =>{ //This return a promise
+		return response.json();
+	}).then(result =>{
+		return result;
+	})	
+	.catch(err =>{
+		return err;
+	})
 }
