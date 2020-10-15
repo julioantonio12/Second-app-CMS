@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import $ from 'jquery';
 import {routeAPI} from '../../../config/Config'
 
-export default function EditAdmin(){
+export default function EditDeleteAdmin(){
     //Hook to capture data
     const [administrators, editAdministrator] = useState({
         user: "",
@@ -73,6 +73,26 @@ export default function EditAdmin(){
             'password' : $("#editPassword").val(),
             'id' : data[0]
         })
+    })
+
+    //Capturing data to delete
+    $(document).on("click", ".deleteInput", function(e){
+        e.preventDefault();
+        let data = $(this).attr("data").split(',')[0];
+        $("#editUser").val(data[1]);
+
+        const deleteAdministrator = async ()=>{
+            //Executing DELETE service
+            const result = await deleteData(data);
+            if(result.status === 400){
+                alert(result.mensaje)
+            }
+            if(result.status === 200){
+                alert(result.mensaje)
+                setTimeout(()=>{window.location.href="/";},3000) //giving 3 seconds to reload page
+            }
+        }
+        deleteAdministrator();
     })
 
     //Returning component view
@@ -149,6 +169,27 @@ const putData = data =>{
     const params = {
         method: 'PUT',
         body: JSON.stringify(data),
+        headers: {
+            "Authorization": token,
+            "Content-Type": "application/json"
+        }
+    }
+    return fetch(url, params).then(response=>{
+        return response.json();
+    }).then(result=>{
+        return result;
+    }).catch(err=>{
+        return err;
+    })
+}
+
+//Petition DELETE for Administrators
+const deleteData = data =>{
+    console.log("data:", data);
+    const url = `${routeAPI}/borrar-administrador/${data}`; //${data.id} that's the way to send the id of the admin that you want to edit
+    const token = localStorage.getItem("ACCESS_TOKEN");
+    const params = {
+        method: 'DELETE',
         headers: {
             "Authorization": token,
             "Content-Type": "application/json"
