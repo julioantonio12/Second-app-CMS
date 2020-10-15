@@ -4,75 +4,75 @@ import {routeAPI} from '../../../config/Config'
 
 export default function EditAdmin(){
     //Hook to capture data
-    // const [administrators, createAdministrator] = useState({
-    //     user: "",
-    //     password: ""
-    // })
+    const [administrators, editAdministrator] = useState({
+        user: "",
+        password: "",
+        id: ""
+    })
 
     //OnChange
-    // const changeFormPost = e =>{
-    //     createAdministrator({
-    //         ...administrators,
-    //         [e.target.name] : e.target.value
-    //     })        
-    // }
+    const changeFormPost = e =>{
+        editAdministrator({
+            ...administrators,
+            [e.target.name] : e.target.value
+        })        
+    }
 
     //OnSubmit
-    // const submitPost = async e =>{
-    //     console.log("Administrators:", administrators);
-    //     $('.alert').remove();
+    const submitPost = async e =>{                
+        $('.alert').remove();
 
-    //     e.preventDefault();
+        e.preventDefault();
         
-    //     //Destructuring
-    //     const {user, password} = administrators;
-    //     //Validating that user field isn't empty
-    //     if(user === ""){
-    //         $(".invalid-user").show();
-    //         $(".invalid-user").html("Completa este campo");
-    //         return; //if this happens, it won't continue the data send
-    //     }
+        //Destructuring
+        const {user, password} = administrators;
+        //Validating that user field isn't empty
+        if(user === ""){
+            $(".invalid-user").show();
+            $(".invalid-user").html("Completa este campo");
+            return; //if this happens, it won't continue the data send
+        }
 
-    //     //Validating Regex
-    //     const expUser = /^(?=.*[A-Za-z]).{2,6}$/; //Regex in react it needs to start with /^ and end with $/
-    //     if(!expUser.test(user)){
-    //         $(".invalid-user").show();
-    //         $(".invalid-user").html("Utiliza un formato que coincida con el solicitado.");
-    //         return;
-    //     }
+        //Validating Regex
+        const expUser = /^(?=.*[A-Za-z]).{2,6}$/; //Regex in react it needs to start with /^ and end with $/
+        if(!expUser.test(user)){
+            $(".invalid-user").show();
+            $(".invalid-user").html("Utiliza un formato que coincida con el solicitado.");
+            return;
+        }
 
-    //     //Validating that password field isn't empty
-    //     if(password === ""){
-    //         $(".invalid-password").show();
-    //         $(".invalid-password").html("Completa este campo");
-    //         return; //if this happens, it won't continue the data send
-    //     }
+        if(password !== ""){
+            //Validating Regex
+            const expPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/; //Regex in react it needs to start with /^ and end with $/
+            if(!expPassword.test(password)){
+                $(".invalid-password").show();
+                $(".invalid-password").html("Utiliza un formato que coincida con el solicitado.");
+                return;
+            }
+        }
 
-    //     //Validating Regex
-    //     const expPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/; //Regex in react it needs to start with /^ and end with $/
-    //     if(!expPassword.test(password)){
-    //         $(".invalid-password").show();
-    //         $(".invalid-password").html("Utiliza un formato que coincida con el solicitado.");
-    //         return;
-    //     }
-
-    //     //Executing POST service
-    //     const result = await postData(administrators);
-    //     if(result.status === 400){
-    //         $(".modal-footer").before(`<div class="alert alert-danger">${result.mensaje}</div>`)
-    //     }
-    //     if(result.status === 200){
-    //         $(".modal-footer").before(`<div class="alert alert-success">${result.mensaje}</div>`)
-    //         $('button[type="submit"]').remove();
-    //         setTimeout(()=>{window.location.href="/";},3000) //giving 3 seconds to reload page
-    //     }
-    // }
+        //Executing PUT service
+        const result = await putData(administrators);
+        if(result.status === 400){
+            $(".modal-footer").before(`<div class="alert alert-danger">${result.mensaje}</div>`)
+        }
+        if(result.status === 200){
+            $(".modal-footer").before(`<div class="alert alert-success">${result.mensaje}</div>`)
+            $('button[type="submit"]').remove();
+            setTimeout(()=>{window.location.href="/";},3000) //giving 3 seconds to reload page
+        }
+    }
 
     //Capturing data to edit
     $(document).on("click", ".editInputs", function(e){
         e.preventDefault();
         let data = $(this).attr("data").split(',');
         $("#editUser").val(data[1]);
+        editAdministrator({            
+            'user' : $("#editUser").val(),
+            'password' : $("#editPassword").val(),
+            'id' : data[0]
+        })
     })
 
     //Returning component view
@@ -85,7 +85,7 @@ export default function EditAdmin(){
                         <button type="button" className="close" data-dismiss="modal">&times;</button>
                     </div>
 
-                    <form>
+                    <form onChange={changeFormPost} onSubmit={submitPost}>
                         <div className="modal-body">   
                             <div className="form-group">
                                 <label className="small text-secondary" htmlFor="editUser">*Mínimo 2 caracteres, máximo 6, sin números</label>
@@ -122,7 +122,7 @@ export default function EditAdmin(){
                                         placeholder="Ingrese la contraseña*"
                                         minLength="8"
                                         pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}"
-                                        required
+                                        // required
                                     />
                                     <div className="invalid-feedvack invalid-password"></div>
                                 </div>
@@ -142,23 +142,23 @@ export default function EditAdmin(){
 }
 
 //Petition PUT for Administrators
-// const postData = data =>{
-//     console.log("data:", data);
-//     const url = `${routeAPI}/crear-administrador`;
-//     const token = localStorage.getItem("ACCESS_TOKEN");
-//     const params = {
-//         method: 'POST',
-//         body: JSON.stringify(data),
-//         headers: {
-//             "Authorization": token,
-//             "Content-Type": "application/json"
-//         }
-//     }
-//     return fetch(url, params).then(response=>{
-//         return response.json();
-//     }).then(result=>{
-//         return result;
-//     }).catch(err=>{
-//         return err;
-//     })
-// }
+const putData = data =>{
+    console.log("data:", data);
+    const url = `${routeAPI}/editar-administrador/${data.id}`; //${data.id} that's the way to send the id of the admin that you want to edit
+    const token = localStorage.getItem("ACCESS_TOKEN");
+    const params = {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+            "Authorization": token,
+            "Content-Type": "application/json"
+        }
+    }
+    return fetch(url, params).then(response=>{
+        return response.json();
+    }).then(result=>{
+        return result;
+    }).catch(err=>{
+        return err;
+    })
+}
