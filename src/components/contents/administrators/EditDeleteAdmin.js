@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import $ from 'jquery';
+import Swal from 'sweetalert2';
 import {routeAPI} from '../../../config/Config'
 
 export default function EditDeleteAdmin(){
@@ -81,18 +82,50 @@ export default function EditDeleteAdmin(){
         let data = $(this).attr("data").split(',')[0];
         $("#editUser").val(data[1]);
 
-        const deleteAdministrator = async ()=>{
-            //Executing DELETE service
-            const result = await deleteData(data);
-            if(result.status === 400){
-                alert(result.mensaje)
+        //Asking if are you sure about deleting the admin
+        Swal.fire({
+            title: '¿Estás seguro de eliminar este registro?',
+            text: "Si no lo está puede cancelar la acción.",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar registro'
+        }).then((result) => {
+            if (result.value) {
+                const deleteAdministrator = async ()=>{
+                    //Executing DELETE service
+                    const result = await deleteData(data);
+                    if(result.status === 400){
+                        Swal.fire({
+                            type:"error",
+                            title: result.mensaje,
+                            showConfirmButton: true,
+                            confirmButtonText: "Cerrar"
+                        }).then(function(result){
+                            if(result.value){
+                                window.location.href = "/";
+                            }
+                        })
+                    }
+                    if(result.status === 200){
+                        Swal.fire({
+                            type:"success",
+                            title: result.mensaje,
+                            showConfirmButton: true,
+                            confirmButtonText: "Cerrar"
+                        }).then(function(result){
+                            if(result.value){
+                                window.location.href = "/";
+                            }
+                        })
+                        // setTimeout(()=>{window.location.href="/";},3000) //giving 3 seconds to reload page
+                    }
+                }
+                deleteAdministrator();                
+
             }
-            if(result.status === 200){
-                alert(result.mensaje)
-                setTimeout(()=>{window.location.href="/";},3000) //giving 3 seconds to reload page
-            }
-        }
-        deleteAdministrator();
+        })
     })
 
     //Returning component view
@@ -185,7 +218,6 @@ const putData = data =>{
 
 //Petition DELETE for Administrators
 const deleteData = data =>{
-    console.log("data:", data);
     const url = `${routeAPI}/borrar-administrador/${data}`; //${data.id} that's the way to send the id of the admin that you want to edit
     const token = localStorage.getItem("ACCESS_TOKEN");
     const params = {
