@@ -1,9 +1,10 @@
-import React, { cloneElement } from 'react'
+import React from 'react'
 import {routeAPI} from '../../../config/Config'
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
 import 'datatables.net-responsive';
+import CreateSlide from './CreateSlide'
 
 export default function Slide(){
 
@@ -118,7 +119,7 @@ export default function Slide(){
 							<div className="card card-primary card-outline">
 								<div className="card-header">
 									<h5 className="m-0">
-										<button className="btn btn-primary">Crear nuevo slide</button>
+										<button className="btn btn-primary" data-toggle="modal" data-target="#createSlide">Crear nuevo slide</button>
 									</h5>
 								</div>
 								<div className="card-body">
@@ -129,7 +130,9 @@ export default function Slide(){
 						</div>
 					</div>
 				</div>
-			</div>        
+			</div>
+            {/* Form to create slide with modal window */}
+            <CreateSlide />
         </div>
     );
 }

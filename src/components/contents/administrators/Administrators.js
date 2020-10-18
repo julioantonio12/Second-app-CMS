@@ -1,5 +1,5 @@
 import React from 'react';
-import $, { get } from 'jquery';
+import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
 import 'datatables.net-responsive';
