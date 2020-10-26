@@ -1,5 +1,8 @@
 import React, {useState} from 'react';
 import $ from 'jquery';
+import notie from 'notie';
+import 'notie/dist/notie.css';
+
 import {routeAPI} from '../../../config/Config'
 
 export default function CreateSlide(){
@@ -8,7 +11,6 @@ export default function CreateSlide(){
         image: null,
         title: "",
         description: ""
-
     })
 
     //onChange
@@ -18,20 +20,28 @@ export default function CreateSlide(){
         //Validating that image format is jpg or png
         if(image["type"] !== "image/jpeg" && image["type"] !== "image/png"){
             $("#image").val("");
-            alert("Error. La imagen debe estar en formato JPG o PNG")
+            notie.alert({
+                type: 3,
+                text: "Error. La imagen debe estar en formato JPG o PNG",
+                time: 7
+            })
             $(".previewImg").attr("src", "");
             return;
         }
         //Validating size        
         else if(image["size"] > 2000000){ //2 million bytes = 2 MB
             $("#image").val("");
-            alert("Error. La imagen no debe pesas más de 2 MB")
+            notie.alert({ // visit for more info about notie alert https://jaredreich.com/notie/
+                type: 3,
+                text: "Error. La imagen no debe pesas más de 2 MB",
+                time: 7
+            })
             $(".previewImg").attr("src", "");
             return;
         }
         else{
             //Codifying image in base 64
-            let fileData = new FileReader;
+            let fileData = new FileReader();
             fileData.readAsDataURL(image);
 
             $(fileData).on("load", function(event){
@@ -49,6 +59,7 @@ export default function CreateSlide(){
 
     //onSubmit
     const submitPost = async e => {
+        $('.alert').remove();
         e.preventDefault();
         //Destructuring in slide object
         const {image, title, description} = slide;
@@ -76,7 +87,18 @@ export default function CreateSlide(){
                 $(".invalid-description").html("Utiliza un formamto que coincida con el solicitado");
             }            
         }
-        console.log("slide:", slide);
+
+        //Executing post service
+        const result = await postData(slide);
+        if(result.status === 400){
+            $(".modal-footer").before(`<div class="alert alert-danger">${result.mensaje}</div>`)
+        }
+
+        if(result.status === 200){
+            $(".modal-footer").before(`<div class="alert alert-success">${result.mensaje}</div>`)
+            $('button[type="submit"]').remove();
+            setTimeout(()=>{window.location.href="/slide";},3000) //giving 3 seconds to reload page
+        }
     }
 
     //Returning the component view
@@ -102,7 +124,7 @@ export default function CreateSlide(){
                                     required
                                 />
                                 <div className="invalid-feedback invalid-image"></div>
-                                <img className="previewImg img-fluid"/>
+                                <img className="previewImg img-fluid" alt=""/>
                             </div>
                             
                             {/* Title entry */}
@@ -160,4 +182,36 @@ export default function CreateSlide(){
             </div>
         </div>
     )
+}
+
+//Petition Post for Slide
+/*
+    In this petition we aren't using a body json stringify because
+    we send a file, so you have to use FormData(); and append those fields of that file
+    so, in body: you have to use the FormData object made (in this cas: formData)
+    And you dont have to use Content-type: application json
+*/
+const postData = data => {
+    console.log("data:", data);
+    const url = `${routeAPI}/crear-slide`;
+    const token = localStorage.getItem("ACCESS_TOKEN");
+    
+    let formData = new FormData();
+    formData.append("archivo", data.image); //"archivo" is the name of the field in the apirest 
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    const params = {
+        method: 'POST',
+        body: formData,
+        headers: {
+            "Authorization": token 
+        }                  
+    }
+    return fetch(url, params).then(response => {
+        return response.json();
+    }).then(result =>{
+        return result;
+    }).catch(err =>{
+        return err.error;
+    })
 }
