@@ -101,6 +101,11 @@ export default function CreateSlide(){
         }
     }
 
+    $(document).on("click", ".clearForm", function(){
+        $(".modal").find('form')[0].reset(); //Reset form after click the X button to close createSlide window
+        $(".previewImg").attr("src", "");
+    })
+
     //Returning the component view
     return(
         <div className="modal fade" id="createSlide">
